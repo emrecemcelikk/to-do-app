@@ -2,6 +2,7 @@
 import React, {useState} from 'react';
 import {View, Text, StyleSheet, KeyboardAvoidingView, TextInput, TouchableOpacity, Keyboard} from 'react-native';
 import Task from './src/components/task';
+import detailedTask from './src/screens/detailedTask';
 
 export default function App() {
   const [task, setTask] = useState();
@@ -12,7 +13,7 @@ export default function App() {
     setTaskItems([...taskItems, task]);
     setTask(null);
   };
-  const completeTask = (index) =>{
+  const completeTask = (index)=>{
     let itemsCopy = [...taskItems];
     itemsCopy.splice(index,1);
     setTaskItems(itemsCopy);
@@ -25,8 +26,8 @@ export default function App() {
         <Text style={styles.sectionTitle}>Today's tasks</Text>
         <View style={styles.items}>
           {taskItems.map((item, index)=>{
-            return <TouchableOpacity key={index} onPress={()=> completeTask(index)} >
-              <Task key={index} text={item}/>
+            return <TouchableOpacity key={index} >
+              <Task key={index} text={item} complete={()=>completeTask(index)} />
             </TouchableOpacity>;
           })}
         </View>
@@ -37,7 +38,7 @@ export default function App() {
           <TextInput style={styles.input} placeholder={'Write a task'} value={task} onChangeText={text => setTask(text)}/>
           <TouchableOpacity onPress={() => handleAddTask()} >
             <View style={styles.addWrapper}>
-                <Text style={styles.addtext}>+</Text>
+                <Text style={styles.addText}>+</Text>
             </View>
           </TouchableOpacity>
         </KeyboardAvoidingView>
@@ -87,5 +88,9 @@ const styles = StyleSheet.create({
     backgroundColor:'#fff',
     justifyContent:'center',
     alignItems:'center',
+  },
+  addText:{
+    color:'#e8eaed',
+    fontSize:25,
   },
 });
