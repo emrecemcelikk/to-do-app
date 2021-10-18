@@ -1,19 +1,19 @@
 /* eslint-disable prettier/prettier */
-import React from 'react';
+import React, { Component } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Icon } from 'react-native-elements';
 
-const Task = (props) => {
+const Task = (props) =>{
     return (
         <View style={styles.item}>
             <View style={styles.itemLeft}>
-                <TouchableOpacity>
-                    <Icon name="md-square-outline" type='ionicon'/>
+                <TouchableOpacity onPress={()=>props.updateTask()}>
+                    <Icon name={props.data.done ? "checkbox-outline" : "square-outline" } type='ionicon'/>
                 </TouchableOpacity>
-                <Text style={styles.itemText}>{props.text}</Text>
+                <Text style={styles.itemText}>{props.data.title}</Text>
             </View>
             <View>
-                <Icon name="md-close" type='ionicon'  onPress={()=>props.complete() } />
+                <Icon  name="md-close" type='ionicon' onPress={()=>props.delete()}/>
             </View>
         </View>
     );
@@ -21,7 +21,7 @@ const Task = (props) => {
 
 const styles = StyleSheet.create({
     item:{
-        backgroundColor:'#fff',
+        backgroundColor:'#fff' ,
         padding:15,
         borderRadius:10,
         flexDirection:'row',

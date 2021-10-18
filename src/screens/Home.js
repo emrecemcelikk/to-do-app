@@ -1,40 +1,99 @@
 /* eslint-disable prettier/prettier */
-import React, {useState} from 'react';
-import {View, Text, StyleSheet, KeyboardAvoidingView, TextInput, TouchableOpacity, Keyboard} from 'react-native';
+import React, {useState , useEffect} from 'react';
+import {View, Text, StyleSheet, ScrollView,KeyboardAvoidingView, TextInput, TouchableOpacity, Keyboard} from 'react-native';
 import Task from '../components/task';
+import AsyncStorage, {useAsyncStorage} from '@react-native-async-storage/async-storage';
 
-const Home = ({navigation}) =>{
-    const [task, setTask] = useState();
-    const [taskItems, setTaskItems] = useState([]);
-    const handleAddTask = () => {
-      Keyboard.dismiss();
-      setTaskItems([...taskItems, task]);
-      setTask(null);
-    };
-    const completeTask = (index)=>{
-      let itemsCopy = [...taskItems];
-      itemsCopy.splice(index,1);
-      setTaskItems(itemsCopy);
-    };
+
+export default function Home() {
+
+const [ready,setReady] = useState(false);
+const initialTasks = [
+
+];
+
+const [value, setValue] = useState(initialTasks);
+const { getItem, setItem } = useAsyncStorage('storedData');
+
+
+
+const readItemFromStorage = async () => {
+  const jsonItem = await getItem();
+  const item = JSON.parse(jsonItem);
+  setValue(item);
+  return await item;
+};
+
+
+const writeItemToStorage = async newValue => {
+  const jsonValue = JSON.stringify(newValue);
+  await setItem(jsonValue);
+  setValue(jsonValue);
+};
+
+
+  const handleAddTask = () =>{
+    Keyboard.dismiss();
+    let data = {title:taskTitle,done:false};
+    let newList = taskList;
+    newList.push(data);
+    setTaskList(newList);
+    setTaskTitle('');
+    writeItemToStorage(newList);
+  };
+
+  const handleDeleteTask = (index) =>{
+    let itemsCopy = [...taskList];
+    itemsCopy.splice(index,1);
+    setTaskList(itemsCopy);
+    writeItemToStorage(itemsCopy);
+  };
+  const handleUpdateTask = (index)=>{
+    let newList = [...taskList];
+    var isTrue = newList[index].done;
+    console.log(isTrue);
+    isTrue ? newList[index].done = false : newList[index].done = true;
+    setTaskList(newList);
+    setTaskTitle('');
+    writeItemToStorage(newList);
+  };
+
+  useEffect(() => {
+    readItemFromStorage();
+  },);
+
+  const [taskList,setTaskList] = useState(value);
+  const [taskTitle,setTaskTitle] = useState('');
+
+  const loadTask = () =>{
+    AsyncStorage.getItem('storedData').then(data=>{
+      if (data !== null){
+        setTaskList(JSON.parse(data));
+      }
+    });
+  };
+
+  if (!ready){
+    loadTask();
+    setReady(true);
+  }
     return (
       <View style={styles.container}>
-  
-        <View style={styles.tasksWrapper}>
-  
-          <Text style={styles.sectionTitle}>Today's tasks</Text>
+        <ScrollView style={styles.tasksWrapper}>
+          <Text style={styles.sectionTitle} onPress={()=>console.log(value)}>Today's tasks</Text>
           <View style={styles.items} >
-            {taskItems.map((item, index)=>{
-              return <TouchableOpacity onPress={()=>  navigation.navigate('TaskDetails')} >
-                <Task key={index} text={item} complete={()=>completeTask(index)} />
-              </TouchableOpacity>;
-            })}
+            {
+              taskList.map(( item, index) => {
+                return (
+                  <Task updateTask={()=>handleUpdateTask(index)} key={index} data={item} delete={()=>handleDeleteTask(index)} />
+                );
+              })
+            }
           </View>
-  
-        </View>
-  
+        </ScrollView>
           <KeyboardAvoidingView style={styles.writeTasksWrapper} >
-            <TextInput style={styles.input} placeholder={'Write a task'} value={task} onChangeText={text => setTask(text)}/>
-            <TouchableOpacity onPress={() => handleAddTask()} >
+            <TextInput style={styles.input} placeholder={'Write a task'} value={taskTitle} onChangeText={value=>setTaskTitle(value)} />
+            <TouchableOpacity onPress={()=> handleAddTask() } >
               <View style={styles.addWrapper}>
                   <Text style={styles.addText}>+</Text>
               </View>
@@ -43,9 +102,7 @@ const Home = ({navigation}) =>{
 
       </View>
     );
-  };
-
-export default Home;
+  }
 
   const styles = StyleSheet.create({
     container: {
@@ -93,4 +150,3 @@ export default Home;
       fontSize:25,
     },
   });
-  
