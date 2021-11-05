@@ -136,6 +136,7 @@ const writeItemToStorage = async newValue => {
       borderRadius:30,
       backgroundColor:'#fff',
       textAlign:'center',
+      color:'black',
     },
     addWrapper:{
       width:60,
